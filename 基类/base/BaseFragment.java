@@ -1,0 +1,84 @@
+package com.lanou.chenfengyao.mirror.base;
+
+import android.content.Context;
+import android.os.Bundle;
+import android.support.annotation.IdRes;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+
+import com.lanou.chenfengyao.mirror.utils.BindContent;
+import com.lanou.chenfengyao.mirror.utils.NoLayoutBindException;
+
+
+/**
+ * Created by ChenFengYao on 16/4/10.
+ * Fragment的基类
+ */
+public abstract class BaseFragment extends Fragment {
+    private Context context;
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        this.context = context;
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(setContent(), container, false);
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        initView();
+    }
+
+    protected abstract void initView();
+
+    protected abstract void initData();
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        initData();
+    }
+
+    protected <T extends View> T bindView(@IdRes int id){
+        return (T) getView().findViewById(id);
+    }
+
+    protected <T extends View> T bindView(@IdRes int id,View view){
+        return (T) view.findViewById(id);
+    }
+
+    /**
+     * 绑定布局的方法
+     * 使用的时候,只需要在类前加上@BindContent(R.layout.xx)即可
+     */
+    private int setContent() {
+        Class clazz = this.getClass();
+        if (clazz.isAnnotationPresent(BindContent.class)) {
+            BindContent bindContent = (BindContent) clazz.getAnnotation(BindContent.class);
+            int id = bindContent.value();
+            if (id > 0) {
+                return id;
+            } else {
+                throw new NoLayoutBindException(clazz.getSimpleName() + "没有绑定布局");
+            }
+        }else {
+            throw new NoLayoutBindException(clazz.getSimpleName() + "没有绑定布局");
+        }
+    }
+
+    //退出时将context对象置空
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        context = null;
+    }
+}
