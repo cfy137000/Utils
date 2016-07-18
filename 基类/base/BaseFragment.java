@@ -5,12 +5,13 @@ import android.os.Bundle;
 import android.support.annotation.IdRes;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.lanou.chenfengyao.mirror.utils.BindContent;
-import com.lanou.chenfengyao.mirror.utils.NoLayoutBindException;
+import com.lanou.chenfengyao.reflection.utils.BindContent;
+import com.lanou.chenfengyao.reflection.utils.NoLayoutBindException;
 
 
 /**
@@ -18,32 +19,32 @@ import com.lanou.chenfengyao.mirror.utils.NoLayoutBindException;
  * Fragment的基类
  */
 public abstract class BaseFragment extends Fragment {
-    private Context context;
+    protected Context context;
     private static final String STATE_SAVE_IS_HIDDEN = "STATE_SAVE_IS_HIDDEN";
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
         this.context = context;
+
     }
 
-     
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         //重新启动的时候，判断状态来决定是否显示出来
         //来解决Fragment的堆叠问题
         super.onCreate(savedInstanceState);
-    if (savedInstanceState != null) {
-        boolean isSupportHidden = savedInstanceState.getBoolean(STATE_SAVE_IS_HIDDEN);
+        if (savedInstanceState != null) {
+            boolean isSupportHidden = savedInstanceState.getBoolean(STATE_SAVE_IS_HIDDEN);
 
-        FragmentTransaction ft = getFragmentManager().beginTransaction();
-        if (isSupportHidden) {
-            ft.hide(this);
-        } else {
-            ft.show(this);
+            FragmentTransaction ft = getFragmentManager().beginTransaction();
+            if (isSupportHidden) {
+                ft.hide(this);
+            } else {
+                ft.show(this);
+            }
+            ft.commit();
         }
-        ft.commit();
     }
 
     //记录当前Fragment的状态
@@ -75,11 +76,11 @@ public abstract class BaseFragment extends Fragment {
         initData();
     }
 
-    protected <T extends View> T bindView(@IdRes int id){
+    protected <T extends View> T bindView(@IdRes int id) {
         return (T) getView().findViewById(id);
     }
 
-    protected <T extends View> T bindView(@IdRes int id,View view){
+    protected <T extends View> T bindView(@IdRes int id, View view) {
         return (T) view.findViewById(id);
     }
 
@@ -97,7 +98,7 @@ public abstract class BaseFragment extends Fragment {
             } else {
                 throw new NoLayoutBindException(clazz.getSimpleName() + "没有绑定布局");
             }
-        }else {
+        } else {
             throw new NoLayoutBindException(clazz.getSimpleName() + "没有绑定布局");
         }
     }
